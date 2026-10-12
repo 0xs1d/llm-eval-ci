@@ -1,0 +1,29 @@
+name: support-answer-regression
+seed: 42
+providers:
+  default:
+    responses:
+      "What is the refund window?": "Refunds are available within 30 days of purchase."
+      "Return a status payload": '{"status":"ok","count":2}'
+tests:
+  - id: refund-window
+    prompt: "What is the refund window?"
+    provider: default
+    assertions:
+      - type: regex
+        pattern: "30 days"
+  - id: status-contract
+    prompt: "Return a status payload"
+    provider: default
+    assertions:
+      - type: json_schema
+        schema:
+          type: object
+          required: [status, count]
+          properties:
+            status: {type: string, enum: [ok]}
+            count: {type: integer, minimum: 0}
+      - type: rule
+        operation: equals
+        path: "$.status"
+        value: ok
