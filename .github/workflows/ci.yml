@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Run tests with coverage
+        run: uv run --python 3.12 --group dev coverage run -m unittest discover -s tests -v
+      - name: Coverage report
+        run: uv run --python 3.12 --group dev coverage report --fail-under=80
+      - name: Run offline example
+        run: uv run --python 3.12 llm-eval examples/suite.yaml --output /tmp/eval-report.json --run-id ci
